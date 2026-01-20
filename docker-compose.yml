@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  # Service Base de Données
+  db:
+    image: mariadb:10.6
+    container_name: prestashop_db
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    volumes:
+      - db_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    networks:
+      - shop_net
+    restart: always
+
+  # Service PrestaShop
+  prestashop:
+    image: prestashop/prestashop:8.1
+    container_name: prestashop_app
+    ports:
+      - "8080:80"
+    links:
+      - db
+    depends_on:
+      - db
+    volumes:
+      - shop_data:/var/www/html
+      - ./scripts:/tmp/post-install-scripts
+    environment:
+      DB_SERVER: db
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWD: ${MYSQL_PASSWORD}
+      DB_NAME: ${MYSQL_DATABASE}
+      PS_DEV_MODE: ${PS_DEV_MODE}
+      PS_INSTALL_AUTO: ${PS_INSTALL_AUTO}
+      PS_DOMAIN: ${PS_DOMAIN}
+      PS_LANGUAGE: ${PS_LANGUAGE}
+      PS_COUNTRY: ${PS_COUNTRY}
+      ADMIN_MAIL: ${ADMIN_MAIL}
+      ADMIN_PASSWD: ${ADMIN_PASSWD}
+      PS_FOLDER_ADMIN: "admin_prestashop"
+    networks:
+      - shop_net
+    restart: always
+
+  # Service phpMyAdmin (Interface SQL)
+  pma:
+    image: phpmyadmin/phpmyadmin
+    container_name: prestashop_pma
+    environment:
+      PMA_HOST: db
+      PMA_USER: ${MYSQL_USER}
+      PMA_PASSWORD: ${MYSQL_PASSWORD}
+      UPLOAD_LIMIT: 64M
+    ports:
+      - "8081:80"
+    networks:
+      - shop_net
+    depends_on:
+      - db
+
+# Volumes pour la persistance des données
+volumes:
+  db_data:
+  shop_data:
+
+# Réseau isolé pour les conteneurs
+networks:
+  shop_net:
+    driver: bridge
