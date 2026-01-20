@@ -34,12 +34,24 @@ Le fichier `.env` à la racine centralise les secrets.
 
 * Si vous cloner ce projet, copiez le fichier d'exemple (s'il existe) ou assurez-vous que le `.env` contient :
 ```ini
-MYSQL_ROOT_PASSWORD=root_super_secure_password
+# --- Base de données ---
+MYSQL_ROOT_PASSWORD=rootpassword
 MYSQL_DATABASE=prestashop
-MYSQL_USER=presta_user
-MYSQL_PASSWORD=presta_password
-PS_DOMAIN=localhost:8080
+MYSQL_USER=prestashop
+MYSQL_PASSWORD=prestashop
+DB_SERVER=db
+
+# --- Config PrestaShop ---
 PS_DEV_MODE=1
+PS_INSTALL_AUTO=1
+PS_DOMAIN=localhost:8080
+
+# --- Info Admin (OBLIGATOIRES pour l'auto-install) ---
+# Sans ça, l'installation automatique échoue silencieusement
+ADMIN_MAIL=admin@prestashop.com
+ADMIN_PASSWD=password123
+PS_LANGUAGE=fr
+PS_COUNTRY=FR
 
 ```
 
